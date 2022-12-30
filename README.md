@@ -269,6 +269,26 @@ Essentially all you need to do during build is:
 
 `docker-entrypoint.sh` script does on-the-fly patching by means of manipulating dynamic linker to workaround read-only mount of Nvidia runtime. Finally it passes original docker command to shell, like if entrypoint was not restricted by `ENTRYPOINT` directive. So `docker run --runtime=nvidia -it mycontainer echo 123` will print `123`. Also it can be just invoked from your entrypoint script, if you have any.
 
+### Example:
+
+Build an images.
+```
+docker rmi sdpower/cuda_ffmpeg
+docker build --no-cache -t sdpower/cuda_ffmpeg .
+```
+
+Run container.
+```
+docker run --rm -it --gpus all \
+    --volume $PWD:/workspace \
+    sdpower/cuda_ffmpeg ffmpeg \
+      -hwaccel_device 0 \
+      -hwaccel cuvid \
+      -c:v h264_cuvid \
+      -i input.mp4 \
+      -c:v hevc_nvenc
+      out.mkv
+```
 ## Flatpak support
 
 If you use a Flatpak app that uses NVENC/NvFBC (e.g. OBS Studio, Kdenlive), it's recommended that you patch the NVIDIA drivers for Flatpak as well. To do so, just pass the `-f` parameter to either `patch.sh` or `patch-fbc.sh`, like so:
